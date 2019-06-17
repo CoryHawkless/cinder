@@ -716,6 +716,7 @@ class CephBackupDriver(driver.BackupDriver):
 
             LOG.debug("Differential backup transfer completed in %.4fs",
                       (time.time() - before))
+            self._delete_all_old_backup_snaps_from_source(source_rbd_image,backup.id)
 
         except exception.BackupRBDOperationFailed:
             with excutils.save_and_reraise_exception():
@@ -1276,6 +1277,33 @@ class CephBackupDriver(driver.BackupDriver):
             LOG.debug("Delete of backup '%(backup)s' for volume "
                       "'%(volume)s' finished.",
                       {'backup': backup.id, 'volume': backup.volume_id})
+
+
+    def _delete_all_old_backup_snaps_from_source(self, rbd_image, backup_id):
+        """Delete everything except the most recent backup snapshot for this
+        volume\backupID combo from the source RBD image
+
+        This function should be called upon the successful completion of a differential backup
+        """
+        LOG.debug("inside_delete_all_old_backup_snaps_from_source %s %s",rbd_image,backup_id)
+        src_vol_backup_snaps = self.get_backup_snaps(rbd_image, sort=True)
+        most_recent_snap = None
+        print(src_vol_backup_snaps)
+        for snap in src_vol_backup_snaps:
+            #Is this snapshot related to the current backupID?
+            if snap['backup_id']==backup_id:
+                #If the backup ID matches, set most_recent_snap to this snap
+                # and keep doing so until we get to the most recent backup
+                # (They are sorted in timestamp order as per get_backup_snaps sort=True)
+                most_recent_snap=snap
+
+        LOG.debug("Most recent snapshot for backup %s is %s, deleting all other snapshots",backup_id,most_recent_snap)
+        for snap in src_vol_backup_snaps:
+            #Loop through all snapshots again,
+            # if the backupid matches and this snapshot IS NOT the most recent then delete it
+            if snap!=most_recent_snap and snap['backup_id']==backup_id:
+                LOG.debug("Deleting old backup snapshot %s",snap['id'])
+                #rbd_image.remove_snap(snap)
 
 
 def get_backup_driver(context):
