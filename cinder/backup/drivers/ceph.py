@@ -1304,7 +1304,7 @@ class CephBackupDriver(driver.BackupDriver):
             # if the backupid matches and this snapshot IS NOT the most recent then delete it
             if snap['name']!=most_recent_snap:
                 LOG.debug("Deleting old backup_snapshot %s",snap['name'])
-                #rbd_image.remove_snap(snap['name'])
+                rbd_image.remove_snap(snap['name'])
 
 
 def get_backup_driver(context):
