@@ -1298,7 +1298,7 @@ class CephBackupDriver(driver.BackupDriver):
             # (They are sorted in timestamp order as per get_backup_snaps sort=True)
             most_recent_snap=snap['name']
 
-        LOG.debug("Most recent backup_snapshot for is %s, deleting all other backup_snapshots",backup_id,most_recent_snap)
+        LOG.debug("Most recent backup_snapshot for is %s, deleting all other backup_snapshots",most_recent_snap)
         for snap in src_vol_backup_snaps:
             #Loop through all snapshots again,
             # if the backupid matches and this snapshot IS NOT the most recent then delete it
