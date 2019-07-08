@@ -1289,16 +1289,22 @@ class CephBackupDriver(driver.BackupDriver):
         src_vol_backup_snaps = self.get_backup_snaps(rbd_image, sort=True)
         most_recent_snap = ""
         print(src_vol_backup_snaps)
+
+        if len(src_vol_backup_snaps)>0:
+            most_recent_snap=src_vol_backup_snaps[0]['name']
+
         for snap in src_vol_backup_snaps:
             #Is this snapshot related to the current backupID?
 
             LOG.debug("Found a backup_snapshot with name %s",snap['name'])
-            #If the backup ID matches, set most_recent_snap to this snap
+            #---WRONG----
+            # If the backup ID matches, set most_recent_snap to this snap
             # and keep doing so until we get to the most recent backup
             # (They are sorted in timestamp order as per get_backup_snaps sort=True)
-            most_recent_snap=snap['name']
+            # most_recent_snap=snap['name']
+            # ---WRONG----
 
-        LOG.debug("Most recent backup_snapshot for is %s, deleting all other backup_snapshots",most_recent_snap)
+        LOG.debug("Most recent backup_snapshot is %s, deleting all other backup_snapshots",most_recent_snap)
         for snap in src_vol_backup_snaps:
             #Loop through all snapshots again,
             # if the backupid matches and this snapshot IS NOT the most recent then delete it
